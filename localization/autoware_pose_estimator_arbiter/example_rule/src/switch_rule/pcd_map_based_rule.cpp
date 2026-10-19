@@ -62,22 +62,29 @@ std::unordered_map<PoseEstimatorType, bool> PcdMapBasedRule::update()
   const auto position = shared_data_->localization_pose_cov()->pose.pose.position;
   const bool ndt_can_operate = pcd_occupancy_->ndt_can_operate(position);
 
+  // Define function to get running pose_estimator
+  const std::set<PoseEstimatorType> running_estimator_set(
+    running_estimator_list_.begin(), running_estimator_list_.end());
+  const auto is_running = [running_estimator_set](const PoseEstimatorType type) -> bool {
+    return running_estimator_set.count(type) != 0;
+  };
+
   if (ndt_can_operate) {
     debug_string_ = "Enable ndt: ";
     return {
-      {PoseEstimatorType::ndt, true},
-      {PoseEstimatorType::yabloc, false},
-      {PoseEstimatorType::eagleye, false},
-      {PoseEstimatorType::artag, false},
+      {PoseEstimatorType::ndt, is_running(PoseEstimatorType::ndt) ? true : false},
+      {PoseEstimatorType::yabloc, is_running(PoseEstimatorType::yabloc) ? true : false},
+      {PoseEstimatorType::eagleye, is_running(PoseEstimatorType::eagleye) ? true : false},
+      {PoseEstimatorType::artag, is_running(PoseEstimatorType::artag) ? true : false},
     };
   }
 
   debug_string_ = "Enable yabloc: ";
   return {
     {PoseEstimatorType::ndt, false},
-    {PoseEstimatorType::yabloc, true},
-    {PoseEstimatorType::eagleye, false},
-    {PoseEstimatorType::artag, false}};
+    {PoseEstimatorType::yabloc, is_running(PoseEstimatorType::yabloc) ? true : false},
+    {PoseEstimatorType::eagleye, is_running(PoseEstimatorType::eagleye) ? true : false},
+    {PoseEstimatorType::artag, is_running(PoseEstimatorType::artag) ? true : false},
 }
 
 }  // namespace autoware::pose_estimator_arbiter::switch_rule

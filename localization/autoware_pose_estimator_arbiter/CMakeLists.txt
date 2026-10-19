@@ -10,6 +10,8 @@ find_package(PCL REQUIRED COMPONENTS common)
 include_directories(
   SYSTEM ${PCL_INCLUDE_DIRS}
   src
+  example_rule
+  example_rule/src
 )
 
 # ==============================
@@ -17,8 +19,12 @@ include_directories(
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/pose_estimator_arbiter_core.cpp
   src/switch_rule/enable_all_rule.cpp
+  example_rule/src/switch_rule/pcd_map_based_rule.cpp
+  example_rule/src/switch_rule/vector_map_based_rule.cpp
+  example_rule/src/rule_helper/pcd_occupancy.cpp
+  example_rule/src/rule_helper/pose_estimator_area.cpp
 )
-target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_include_directories(${PROJECT_NAME} PUBLIC src example_rule example_rule/src)
 target_link_libraries(${PROJECT_NAME} magic_enum::magic_enum)
 
 rclcpp_components_register_node(${PROJECT_NAME}

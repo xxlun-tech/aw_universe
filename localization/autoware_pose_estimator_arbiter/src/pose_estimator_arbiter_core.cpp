@@ -20,6 +20,7 @@
 #include "stopper/stopper_ndt.hpp"
 #include "stopper/stopper_yabloc.hpp"
 #include "switch_rule/enable_all_rule.hpp"
+#include "switch_rule/pcd_map_based_rule.hpp"
 
 #include <magic_enum.hpp>
 
@@ -142,7 +143,8 @@ void PoseEstimatorArbiter::load_switch_rule()
   // NOTE: In the future, some rule will be laid below
   RCLCPP_INFO_STREAM(get_logger(), "load default switching rule");
   switch_rule_ =
-    std::make_shared<switch_rule::EnableAllRule>(*this, running_estimator_list_, shared_data_);
+    // std::make_shared<switch_rule::EnableAllRule>(*this, running_estimator_list_, shared_data_);
+    std::make_shared<switch_rule::PcdMapBasedRule>(*this, running_estimator_list_, shared_data_);
 }
 
 void PoseEstimatorArbiter::toggle_each(
