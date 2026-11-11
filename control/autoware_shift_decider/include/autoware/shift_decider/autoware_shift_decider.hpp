@@ -15,8 +15,6 @@
 #ifndef AUTOWARE__SHIFT_DECIDER__AUTOWARE_SHIFT_DECIDER_HPP_
 #define AUTOWARE__SHIFT_DECIDER__AUTOWARE_SHIFT_DECIDER_HPP_
 
-#include "shift_decider_parameters.hpp"
-
 #include <autoware/agnocast_wrapper/node.hpp>
 #include <autoware/agnocast_wrapper/polling_subscriber.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -61,10 +59,7 @@ private:
   autoware_system_msgs::msg::AutowareState::ConstSharedPtr autoware_state_;
   autoware_vehicle_msgs::msg::GearCommand shift_cmd_;
   autoware_vehicle_msgs::msg::GearReport::ConstSharedPtr current_gear_ptr_;
-  uint8_t prev_shift_command = autoware_vehicle_msgs::msg::GearCommand::PARK;
-
-  std::shared_ptr<::shift_decider::ParamListener> param_listener_;
-  ::shift_decider::Params param_;
+  uint8_t prev_shift_command = autoware_vehicle_msgs::msg::GearCommand::NEUTRAL;
 };
 }  // namespace autoware::shift_decider
 

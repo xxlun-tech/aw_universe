@@ -3,6 +3,9 @@
   <arg name="pose_sources" description=""/>
   <arg name="input_pointcloud" description=""/>
 
+  <arg name="pcd_density_lower_threshold" default="1" description=""/>
+  <arg name="pcd_density_upper_threshold" default="5" description=""/>
+
   <node pkg="autoware_pose_estimator_arbiter" exec="autoware_pose_estimator_arbiter_node" output="both">
     <param name="pose_sources" value="$(var pose_sources)"/>
     <!-- modify lidar_marker_instance_names value following the lidar system that uses lidar_marker_localizer -->
@@ -11,6 +14,9 @@
       /localization/pose_estimator/lidar_marker_localizer/top_left,
       /localization/pose_estimator/lidar_marker_localizer/top_right
     ]"/>
+
+    <param name="pcd_density_lower_threshold" value="$(var pcd_density_lower_threshold)"/>
+    <param name="pcd_density_upper_threshold" value="$(var pcd_density_upper_threshold)"/>
 
     <!-- ndt -->
     <remap from="~/input/ndt/pointcloud" to="$(var input_pointcloud)"/>

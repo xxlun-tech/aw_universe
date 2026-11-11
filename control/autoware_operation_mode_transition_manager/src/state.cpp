@@ -95,7 +95,7 @@ bool AutonomousMode::isModeChangeCompleted(const InputData & input_data)
   const auto & param = engage_acceptable_param_;
 
   // Engagement completes quickly if the vehicle is stopped.
-  if (param.allow_autonomous_in_stopped && std::abs(current_speed) < 0.01) {
+  if (param.allow_autonomous_in_stopped && std::abs(current_speed) < 0.2) {
     return true;
   }
 
@@ -226,7 +226,7 @@ bool AutonomousMode::isModeChangeAvailable(const InputData & input_data)
   const auto target_control_speed = control_cmd.longitudinal.velocity;
   const auto & param = engage_acceptable_param_;
 
-  if (!enable_engage_on_driving_ && std::fabs(current_speed) > 1.0e-2) {
+  if (!enable_engage_on_driving_ && std::fabs(current_speed) > 0.2) {
     RCLCPP_INFO_THROTTLE(
       logger_, *clock_, 3000,
       "Engage unavailable: enable_engage_on_driving is false, and the vehicle is not "

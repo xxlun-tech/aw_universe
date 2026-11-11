@@ -83,7 +83,7 @@ void StopModeOperator::publish_gear_command()
 
   GearCommand gear;
   gear.stamp = now();
-  gear.command = parking ? GearCommand::PARK : GearCommand::NONE;
+  gear.command = parking ? GearCommand::NEUTRAL : GearCommand::NONE;
   pub_gear_->publish(gear);
 }
 

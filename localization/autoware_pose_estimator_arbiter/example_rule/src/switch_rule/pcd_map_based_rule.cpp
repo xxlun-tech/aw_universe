@@ -59,8 +59,11 @@ PcdMapBasedRule::MarkerArray PcdMapBasedRule::debug_marker_array()
 
 std::unordered_map<PoseEstimatorType, bool> PcdMapBasedRule::update()
 {
-  const auto position = shared_data_->localization_pose_cov()->pose.pose.position;
-  const bool ndt_can_operate = pcd_occupancy_->ndt_can_operate(position);
+  bool ndt_can_operate = true;
+  if (shared_data_->localization_pose_cov.has_value()) {
+    const auto position = shared_data_->localization_pose_cov()->pose.pose.position;
+    ndt_can_operate = pcd_occupancy_->ndt_can_operate(position);
+  }
 
   // Define function to get running pose_estimator
   const std::set<PoseEstimatorType> running_estimator_set(
@@ -85,6 +88,7 @@ std::unordered_map<PoseEstimatorType, bool> PcdMapBasedRule::update()
     {PoseEstimatorType::yabloc, is_running(PoseEstimatorType::yabloc) ? true : false},
     {PoseEstimatorType::eagleye, is_running(PoseEstimatorType::eagleye) ? true : false},
     {PoseEstimatorType::artag, is_running(PoseEstimatorType::artag) ? true : false},
+  };
 }
 
 }  // namespace autoware::pose_estimator_arbiter::switch_rule
