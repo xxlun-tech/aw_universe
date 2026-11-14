@@ -157,7 +157,16 @@ std::shared_ptr<QPSolverInterface> MpcLateralController::createQPSolverInterface
   return nullptr;
 }
 
-MpcLateralControllerResult MpcLateralController::run(
+tl::expected<trajectory_follower::LateralOutput, std::string> MpcLateralController::run(
+  const trajectory_follower::InputData & input_data, const rclcpp::Time & stamp)
+{
+  if (!isReady(input_data)) {
+    return tl::make_unexpected("MPC is not ready to run.");
+  }
+  return runDetailed(input_data, stamp).output;
+}
+
+MpcLateralControllerResult MpcLateralController::runDetailed(
   trajectory_follower::InputData const & input_data, const rclcpp::Time & stamp)
 {
   MpcLateralControllerResult result;
@@ -222,12 +231,13 @@ MpcLateralControllerResult MpcLateralController::run(
   result.steering_offset.data = static_cast<float>(m_steering_offset_filtered_);
 
   const auto createLateralOutput =
-    [this, &stamp](
+    [this, &stamp, &mpc_solved_status](
       const auto & cmd, const bool is_mpc_solved,
       const auto & cmd_horizon) -> trajectory_follower::LateralOutput {
     trajectory_follower::LateralOutput output;
     output.control_cmd = createCtrlCmdMsg(cmd, stamp);
     output.control_cmd_horizon = createCtrlCmdHorizonMsg(cmd_horizon, stamp);
+    output.predicted_trajectory = mpc_solved_status.predicted_trajectory;
     // To be sure current steering of the vehicle is desired steering angle, we need to check
     // following conditions.
     // 1. At the last loop, mpc should be solved because command should be optimized output.

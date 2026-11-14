@@ -15,9 +15,11 @@
 #include "autoware/mpc_lateral_controller/mpc_lateral_controller_node.hpp"
 
 #include "autoware/mpc_lateral_controller/mpc_utils.hpp"
+#include "autoware_utils/system/stop_watch.hpp"
 #include "autoware_vehicle_info_utils/vehicle_info_utils.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <memory>
 #include <string>
@@ -26,6 +28,18 @@
 
 namespace autoware::motion::control::mpc_lateral_controller
 {
+namespace
+{
+void publish_processing_time(
+  const rclcpp::Publisher<autoware_internal_debug_msgs::msg::Float64Stamped>::SharedPtr & publisher,
+  autoware_utils::StopWatch<std::chrono::milliseconds> & stop_watch, rclcpp::Clock & clock)
+{
+  autoware_internal_debug_msgs::msg::Float64Stamped processing_time;
+  processing_time.stamp = clock.now();
+  processing_time.data = stop_watch.toc();
+  publisher->publish(processing_time);
+}
+}  // namespace
 
 MpcLateralControllerConfig MpcLateralControllerNode::createConfig(rclcpp::Node & node)
 {
@@ -152,7 +166,6 @@ MpcLateralControllerNode::MpcLateralControllerNode(
 {
   m_controller = std::make_unique<MpcLateralController>(createConfig(node), writer_);
 
-  m_pub_predicted_traj = node.create_publisher<Trajectory>("~/output/predicted_trajectory", 1);
   m_pub_predicted_traj_frenet =
     node.create_publisher<Trajectory>("~/debug/predicted_trajectory_in_frenet_coordinate", 1);
   m_pub_resampled_reference_traj =
@@ -163,6 +176,8 @@ MpcLateralControllerNode::MpcLateralControllerNode(
   m_pub_debug_values =
     node.create_publisher<Float32MultiArrayStamped>("~/output/lateral_diagnostic", 1);
   m_pub_steer_offset = node.create_publisher<Float32Stamped>("~/output/estimated_steer_offset", 1);
+  m_pub_processing_time_ms =
+    node.create_publisher<Float64Stamped>("~/lateral/debug/processing_time_ms", 1);
 
   /* get parameter updates */
   using std::placeholders::_1;
@@ -175,22 +190,23 @@ MpcLateralControllerNode::MpcLateralControllerNode(
 tl::expected<trajectory_follower::LateralOutput, std::string> MpcLateralControllerNode::run(
   const trajectory_follower::InputData & input_data, const rclcpp::Time & stamp)
 {
+  autoware_utils::StopWatch<std::chrono::milliseconds> stop_watch;
+
   if (!m_controller->isReady(input_data)) {
     return tl::make_unexpected("MPC is not ready to run.");
   }
 
-  const auto result = m_controller->run(input_data, stamp);
+  const auto result = m_controller->runDetailed(input_data, stamp);
 
   publish(result);
+
+  publish_processing_time(m_pub_processing_time_ms, stop_watch, *clock_);
 
   return result.output;
 }
 
 void MpcLateralControllerNode::publish(const MpcLateralControllerResult & result)
 {
-  auto predicted_trajectory = result.mpc.predicted_trajectory;
-  m_pub_predicted_traj->publish(predicted_trajectory);
-
   if (result.mpc.debug_msgs) {
     const auto & debug_msgs = *result.mpc.debug_msgs;
     m_pub_predicted_traj_frenet->publish(debug_msgs.predicted_trajectory_frenet);

@@ -24,6 +24,7 @@
 
 #include "autoware_internal_debug_msgs/msg/float32_multi_array_stamped.hpp"
 #include "autoware_internal_debug_msgs/msg/float32_stamped.hpp"
+#include "autoware_internal_debug_msgs/msg/float64_stamped.hpp"
 #include "autoware_planning_msgs/msg/trajectory.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 
@@ -36,6 +37,7 @@ namespace autoware::motion::control::mpc_lateral_controller
 {
 using autoware_internal_debug_msgs::msg::Float32MultiArrayStamped;
 using autoware_internal_debug_msgs::msg::Float32Stamped;
+using autoware_internal_debug_msgs::msg::Float64Stamped;
 using autoware_planning_msgs::msg::Trajectory;
 using geometry_msgs::msg::PoseStamped;
 
@@ -75,7 +77,6 @@ private:
   std::shared_ptr<diagnostic_updater::Updater> diag_updater_;
   rclcpp::Node::OnSetParametersCallbackHandle::SharedPtr m_set_param_res;
 
-  rclcpp::Publisher<Trajectory>::SharedPtr m_pub_predicted_traj;
   rclcpp::Publisher<Trajectory>::SharedPtr m_pub_predicted_traj_frenet;
   rclcpp::Publisher<Trajectory>::SharedPtr m_pub_resampled_reference_traj;
   rclcpp::Publisher<PoseStamped>::SharedPtr m_pub_nearest_pose;
@@ -83,6 +84,7 @@ private:
   rclcpp::Publisher<Float32MultiArrayStamped>::SharedPtr m_pub_nearest_info;
   rclcpp::Publisher<Float32MultiArrayStamped>::SharedPtr m_pub_debug_values;
   rclcpp::Publisher<Float32Stamped>::SharedPtr m_pub_steer_offset;
+  rclcpp::Publisher<Float64Stamped>::SharedPtr m_pub_processing_time_ms;
 };
 }  // namespace autoware::motion::control::mpc_lateral_controller
 

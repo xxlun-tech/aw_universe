@@ -20,10 +20,12 @@
 #include "autoware/trajectory_follower_base/sync_data.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-#include <tl_expected/expected.hpp>
+#include <tl/expected.hpp>
 
 #include "autoware_control_msgs/msg/lateral.hpp"
+#include "autoware_planning_msgs/msg/trajectory.hpp"
 
+#include <optional>
 #include <string>
 
 namespace autoware::motion::control::trajectory_follower
@@ -34,6 +36,7 @@ struct LateralOutput
   Lateral control_cmd;
   LateralHorizon control_cmd_horizon;
   LateralSyncData sync_data;
+  std::optional<autoware_planning_msgs::msg::Trajectory> predicted_trajectory{std::nullopt};
 };
 
 class LateralControllerInterface
